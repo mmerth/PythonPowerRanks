@@ -214,23 +214,24 @@ class PowerRankWorker(threading.Thread):
         MU_WEIGHT = 2;
         totalPR = 0;
         #print "player name: {0} -> pp = {1}".format(playerName, playerDict['PP'])
-        for opponent in playerDict['opponents']:
-            V = 0;
-            L = 0;
-            if playerDict.has_key('victories') and playerDict['victories'].has_key(opponent):
-                if playerDict['PP'] != 0:
-                    V = (playerInfo[opponent]['PP'] / playerDict['PP']) * playerDict['victories'][opponent]
-                else:
-                    V = 0
-                
-            if playerDict.has_key('losses') and playerDict['losses'].has_key(opponent):
-                if playerInfo[opponent]['PP'] != 0:
-                    L = (playerDict['PP'] / playerInfo[opponent]['PP']) * playerDict['losses'][opponent]
-                else:
-                    L = 0
-                
-            totalPR = totalPR  + (playerDict['PP'] * PP_WEIGHT) + ((V - L) * MU_WEIGHT)
-            self.grandTotalPR = self.grandTotalPR + totalPR
+        if playerDict.has_key('opponents'):
+            for opponent in playerDict['opponents']:
+                V = 0;
+                L = 0;
+                if playerDict.has_key('victories') and playerDict['victories'].has_key(opponent):
+                    if playerDict['PP'] != 0:
+                        V = (playerInfo[opponent]['PP'] / playerDict['PP']) * playerDict['victories'][opponent]
+                    else:
+                        V = 0
+                    
+                if playerDict.has_key('losses') and playerDict['losses'].has_key(opponent):
+                    if playerInfo[opponent]['PP'] != 0:
+                        L = (playerDict['PP'] / playerInfo[opponent]['PP']) * playerDict['losses'][opponent]
+                    else:
+                        L = 0
+                    
+                totalPR = totalPR  + (playerDict['PP'] * PP_WEIGHT) + ((V - L) * MU_WEIGHT)
+                self.grandTotalPR = self.grandTotalPR + totalPR
         
         PRList.append((playerName, totalPR, playerInfo[playerName]['attendance']))
         
@@ -260,7 +261,8 @@ class PowerRankWorker(threading.Thread):
             return (.01 * playerCount) + oldPP
         elif rank >= 49:
             return 0 + oldPP
-        
+        else:
+            return 0 + oldPP
         
         
         
@@ -269,9 +271,8 @@ class PowerRankWorker(threading.Thread):
         #the scores_csv attribute of the match json is in the form of #-# (0-2)
         #if the match was not complete, it will be 0--1
         #add these numbers together in order to determine if the match was played.
-        print scores_csv
-        num1 = int(re.sub(r'(\d+)-(\d+).*', '\\1', scores_csv))
-        num2 = int(re.sub(r'(\d+)-(\d+).*', '\\2', scores_csv))
+        num1 = int(re.sub(r'(\d+)--?(\d+).*', '\\1', scores_csv))
+        num2 = int(re.sub(r'(\d+)--?(\d+).*', '\\2', scores_csv))
         total = num1 + num2
         if total <= 0:
             return False
